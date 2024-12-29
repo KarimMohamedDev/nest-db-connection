@@ -6,7 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseUUIDPipe,
+  ParseIntPipe,
   Patch,
   Post,
 } from '@nestjs/common';
@@ -21,38 +21,38 @@ export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  find(): User[] {
-    return this.userService.findUsers();
+  async find(): Promise<User[]> {
+    return await this.userService.findUsers();
   }
 
   @Get(':id')
-  findOne(
-    @Param('id', ParseUUIDPipe)
-    id: string,
-  ): UserResponseDto {
-    return this.userService.findUserById(id);
+  async findOne(
+    @Param('id', ParseIntPipe)
+    id: number,
+  ): Promise<UserResponseDto> {
+    return await this.userService.findUserById(id);
   }
 
   @Post()
-  create(
+  async create(
     @Body()
     createUserDto: CreateUserDto,
-  ): UserResponseDto {
-    return this.userService.createUser(createUserDto);
+  ): Promise<UserResponseDto> {
+    return await this.userService.createUser(createUserDto);
   }
 
   @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
+  async update(
+    @Param('id', ParseIntPipe) id: number,
     @Body()
     updateUserDto: UpdateUserDto,
   ) {
-    return this.userService.updateUser(id, updateUserDto);
+    return await this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    this.userService.deleteUser(id);
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.userService.deleteUser(id);
   }
 }

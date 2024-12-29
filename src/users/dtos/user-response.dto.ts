@@ -1,17 +1,14 @@
 import { Exclude, Expose } from 'class-transformer';
 
 export class UserResponseDto {
-  id: string;
+  id: number;
+
   username: string;
+
   email: string;
 
   @Expose({ name: 'Country' })
   country: string;
-
-  // @Expose({ name: 'Address' })
-  // getCountry(): string {
-  //   return this.country;
-  // }
 
   @Exclude()
   password: string;
