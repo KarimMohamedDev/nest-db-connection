@@ -1,46 +1,48 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { v4 as uuid } from 'uuid';
 import { UserResponseDto } from './dtos/user-response.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
-  private users: UserEntity[] = [];
+  constructor(
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
+  ) {}
 
-  findUsers(): UserEntity[] {
-    return this.users;
+  async findUsers(): Promise<User[]> {
+    return await this.userRepo.find();
   }
 
-  findUserById(id: string): UserResponseDto {
-    const user = this.users.find((user) => user.id === id);
+  async findUserById(id: number): Promise<UserResponseDto> {
+    const user = await this.userRepo.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`Not found user ${id}`);
     }
     return new UserResponseDto(user);
   }
 
-  createUser(createUserDto: CreateUserDto): UserResponseDto {
-    const newUser: UserEntity = {
-      ...createUserDto,
-      id: uuid(),
-    };
-    this.users.push(newUser);
+  async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const newUser: User = await this.userRepo.save(createUserDto);
 
     return new UserResponseDto(newUser);
   }
 
-  updateUser(id: string, updateUserDto: UpdateUserDto): UserEntity {
-    // 1) find the element index that we want to update
-    const index = this.users.findIndex((user) => user.id === id);
-    // 2) update the element
-    this.users[index] = { ...this.users[index], ...updateUserDto };
-
-    return this.users[index];
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    const existingUser = await this.findUserById(id);
+    let updatedUser: User;
+    if (existingUser) {
+      await this.userRepo.update(id, updateUserDto);
+    }
+    return { ...existingUser, ...updateUserDto };
   }
 
-  deleteUser(id: string): void {
-    this.users = this.users.filter((user) => user.id !== id);
+  async deleteUser(id: number): Promise<void> {
+    const existingUser = await this.findUserById(id);
+    if (existingUser) {
+      this.userRepo.delete(id);
+    }
   }
 }
