@@ -13,4 +13,6 @@ export class CreateUserDto {
 
   @IsString()
   readonly password: string;
+
+  createdAt: Date;
 }

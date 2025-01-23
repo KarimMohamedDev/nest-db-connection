@@ -30,7 +30,7 @@ export class UserService {
     return new UserResponseDto(newUser);
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
     const existingUser = await this.findUserById(id);
     let updatedUser: User;
     if (existingUser) {
